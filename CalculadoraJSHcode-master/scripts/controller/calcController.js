@@ -23,6 +23,8 @@ class CalcController {
 
       }, 1000);
 
+      this.setLastNumberToDisplay()
+
   }
 
   addEventListenerAll(element, events, fn){
@@ -39,11 +41,15 @@ class CalcController {
 
       this._operation = [];
 
+      this.setLastNumberToDisplay();
+
   }
 
   clearEntry(){
 
       this._operation.pop();
+
+      this.setLastNumberToDisplay();
 
   }
 
@@ -65,9 +71,69 @@ class CalcController {
 
   }
 
-  addOperation(value){
+  pushOperation(value){
+    this._operation.push(value);
 
-      console.log('A', isNaN(this.getLastOperation()));
+    if(this._operation.length > 3){
+
+
+        this.calc();
+
+
+    }
+  }
+
+  calc(){
+
+    let last = '';
+
+    if (this._operation.length > 3){
+        last = this._operation.pop();
+
+    }
+    
+    
+    let result =  eval(this._operation.join(""));
+
+    if (last == '%') {
+        
+        result  = result/ 100;
+
+        this._operation = [result];
+
+    } else{
+
+        this._operation = [result];
+
+        if (last) this._operation.push(last);
+
+      
+    }
+
+    this.setLastNumberToDisplay();
+
+  }
+
+  setLastNumberToDisplay(){
+
+    let lastNumber;
+
+    for ( let i = this._operation.length-1; i >= 0; i-- ){
+
+        if(!this.isOperator(this._operation[i])){
+            lastNumber = this._operation[i];
+            break;
+        }
+
+    }
+
+    if (!lastNumber) lastNumber= 0;
+
+    this.displayCalc = lastNumber;
+
+  }
+
+  addOperation(value){
 
       if (isNaN(this.getLastOperation())) {
 
@@ -77,23 +143,32 @@ class CalcController {
 
           } else if (isNaN(value)){
 
-              console.log(value);
+              console.log("Outra coisa " ,value);
 
           } else {
 
-              this._operation.push(value);
+                this.pushOperation(value);
+                this.setLastNumberToDisplay();
 
           }
+         } else{
+            if (this.isOperator(value)) {
+               
+                this.pushOperation(value);
 
-      } else {
+            } else{
 
-          let newValue = this.getLastOperation().toString() + value.toString();
+                let newValue = this.getLastOperation().toString() + value.toString();
+                this.setLastOperation(parseInt(newValue));
 
-          this.setLastOperation(parseInt(newValue));
+                this.setLastNumberToDisplay();
 
-      }
+            }
+          
+        
 
-      console.log(this._operation);
+            }
+
 
   }
 
@@ -136,7 +211,7 @@ class CalcController {
               break;
 
           case 'igual':
-              
+              this.calc();
               break;
 
           case 'ponto':
